@@ -1,0 +1,6 @@
+project: Petstore-API-Docs
+source: docs/
+output: _build/
+openapi:
+  source: petstore-api-draft.yaml
+  path: /api-reference
