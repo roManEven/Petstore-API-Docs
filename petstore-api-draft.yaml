@@ -27,25 +27,25 @@ components:
         id:
           type: integer
           format: int64
-          description: Уникальный идентификатор питомца.
+          description: Уникальный идентификатор питомца в системе.
         name:
           type: string
-          description: Имя питомца.
+          description: Имя питомца, например, "Шарик".
         category:
           type: object
           properties:
             id:
               type: integer
-              description: Идентификатор категории питомца (например, собаки, кошки).
+              description: Уникальный идентификатор категории питомца (например, 1 для собак, 2 для кошек).
             name:
               type: string
-              description: Название категории питомца.
-          description: Категория, к которой относится питомец.
+              description: Название категории питомца, например, "собаки" или "кошки".
+          description: Категория, к которой относится питомец (например, собаки, кошки).
         photoUrls:
           type: array
           items:
             type: string
-          description: Список URL-адресов фотографий питомца.
+          description: Список URL-адресов фотографий питомца, например, ["https://example.com/photo1.jpg"].
         tags:
           type: array
           items:
@@ -53,18 +53,19 @@ components:
             properties:
               id:
                 type: integer
-                description: Идентификатор тега.
+                description: Уникальный идентификатор тега, например, 1.
               name:
                 type: string
-                description: Название тега (например, "дружелюбный").
-            description: Теги, описывающие характеристики питомца.
+                description: Название тега, описывающего характеристику питомца, например, "дружелюбный" или "активный".
+            description: Тег, описывающий характеристику питомца.
+          description: Список тегов, описывающих характеристики питомца.
         status:
           type: string
           enum:
             - available
             - pending
             - sold
-          description: Статус питомца в магазине (доступен, в процессе продажи, продан).
+          description: Статус питомца в магазине ("available" - доступен, "pending" - в процессе продажи, "sold" - продан).
     Order:
       type: object
       required:
@@ -76,28 +77,28 @@ components:
         id:
           type: integer
           format: int64
-          description: Уникальный идентификатор заказа.
+          description: Уникальный идентификатор заказа в системе.
         petId:
           type: integer
           format: int64
           description: Идентификатор питомца, связанного с заказом.
         quantity:
           type: integer
-          description: Количество заказанных питомцев.
+          description: Количество заказанных питомцев, например, 1.
         shipDate:
           type: string
           format: date-time
-          description: Дата и время отправки заказа.
+          description: Дата и время отправки заказа в формате ISO 8601, например, "2025-06-04T20:12:00Z".
         status:
           type: string
           enum:
             - placed
             - approved
             - delivered
-          description: Статус заказа (размещён, подтверждён, доставлен).
+          description: Статус заказа ("placed" - размещён, "approved" - подтверждён, "delivered" - доставлен).
         complete:
           type: boolean
-          description: Указывает, завершён ли заказ.
+          description: Указывает, завершён ли заказ (true - завершён, false - не завершён).
     User:
       type: object
       required:
@@ -107,28 +108,30 @@ components:
         id:
           type: integer
           format: int64
-          description: Уникальный идентификатор пользователя.
+          description: Уникальный идентификатор пользователя в системе.
         username:
           type: string
-          description: Имя пользователя для входа в систему.
+          description: Имя пользователя для входа в систему, например, "user123".
         firstName:
           type: string
-          description: Имя пользователя.
+          description: Имя пользователя, например, "Иван".
+        lastuses:
+          - username
         lastName:
           type: string
-          description: Фамилия пользователя.
+          description: Фамилия пользователя, например, "Иванов".
         email:
           type: string
-          description: Электронная почта пользователя.
+          description: Электронная почта пользователя, например, "ivan.ivanov@example.com".
         password:
           type: string
-          description: Пароль для входа в систему (зашифрован).
+          description: Пароль для входа в систему (хранится в зашифрованном виде).
         phone:
           type: string
-          description: Номер телефона пользователя.
+          description: Номер телефона пользователя, например, "+79991234567".
         userStatus:
           type: integer
-          description: Статус пользователя (например, активен, заблокирован).
+          description: Статус пользователя (например, 1 - активен, 0 - заблокирован).
 paths:
   /pet:
     post:
@@ -146,32 +149,36 @@ paths:
       responses:
         '200':
           description: Питомец успешно добавлен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
         '400':
-          description: Неверный запрос.
-    /pet/{petId}:
-      get:
-        summary: Получить информацию о питомце
-        description: Возвращает данные питомца по его идентификатору.
-        operationId: getPetById
-        security:
-          - apiKey: []
-        parameters:
-          - name: petId
-            in: path
-            required: true
-            schema:
-              type: integer
-              format: int64
-            description: Идентификатор питомца.
-        responses:
-          '200':
-            description: Успешный ответ с данными питомца.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Pet'
-          '404':
-            description: Питомец не найден.
+          description: Неверный запрос (например, отсутствуют обязательные поля).
+  /pet/{petId}:
+    get:
+      summary: Получить информацию о питомце
+      description: Возвращает данные питомца по его идентификатору.
+      operationId: getPetById
+      security:
+        - apiKey: []
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Идентификатор питомца, например, 123.
+      responses:
+        '200':
+          description: Успешный ответ с данными питомца.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '404':
+          description: Питомец с указанным идентификатором не найден.
   /store/order:
     post:
       summary: Разместить заказ
@@ -184,12 +191,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Order'
-        description: Данные заказа.
+        description: Данные заказа для размещения.
       responses:
         '200':
           description: Заказ успешно размещён.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
         '400':
-          description: Неверный запрос.
+          description: Неверный запрос (например, отсутствуют обязательные поля).
   /user:
     post:
       summary: Создать пользователя
@@ -202,9 +213,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-        description: Данные пользователя.
+        description: Данные пользователя для создания.
       responses:
         '200':
           description: Пользователь успешно создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         '400':
-          description: Неверный запрос.
+          description: Неверный запрос 
