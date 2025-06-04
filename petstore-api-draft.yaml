@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  title: Petstore API
+  description: API для управления магазином питомцев, включая добавление, поиск, обновление и удаление питомцев, управление заказами и пользователями.
+  version: 1.0.0
+servers:
+  - url: https://api.petstore.com/v2
+    description: Основной сервер (продакшен)
+  - url: https://api.petstore-test.com/v2
+    description: Тестовый сервер для разработки и тестирования
+security:
+  - apiKey: []
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: X-API-Key
+      in: header
+      description: API-ключ для аутентификации запросов. Получите ключ в личном кабинете.
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор питомца.
+        name:
+          type: string
+          description: Имя питомца.
+        category:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Идентификатор категории питомца (например, собаки, кошки).
+            name:
+              type: string
+              description: Название категории питомца.
+          description: Категория, к которой относится питомец.
+        photoUrls:
+          type: array
+          items:
+            type: string
+          description: Список URL-адресов фотографий питомца.
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: Идентификатор тега.
+              name:
+                type: string
+                description: Название тега (например, "дружелюбный").
+            description: Теги, описывающие характеристики питомца.
+        status:
+          type: string
+          enum:
+            - available
+            - pending
+            - sold
+          description: Статус питомца в магазине (доступен, в процессе продажи, продан).
+    Order:
+      type: object
+      required:
+        - id
+        - petId
+        - quantity
+        - shipDate
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор заказа.
+        petId:
+          type: integer
+          format: int64
+          description: Идентификатор питомца, связанного с заказом.
+        quantity:
+          type: integer
+          description: Количество заказанных питомцев.
+        shipDate:
+          type: string
+          format: date-time
+          description: Дата и время отправки заказа.
+        status:
+          type: string
+          enum:
+            - placed
+            - approved
+            - delivered
+          description: Статус заказа (размещён, подтверждён, доставлен).
+        complete:
+          type: boolean
+          description: Указывает, завершён ли заказ.
+    User:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор пользователя.
+        username:
+          type: string
+          description: Имя пользователя для входа в систему.
+        firstName:
+          type: string
+          description: Имя пользователя.
+        lastName:
+          type: string
+          description: Фамилия пользователя.
+        email:
+          type: string
+          description: Электронная почта пользователя.
+        password:
+          type: string
+          description: Пароль для входа в систему (зашифрован).
+        phone:
+          type: string
+          description: Номер телефона пользователя.
+        userStatus:
+          type: integer
+          description: Статус пользователя (например, активен, заблокирован).
+paths:
+  /pet:
+    post:
+      summary: Добавить нового питомца
+      description: Создаёт нового питомца в магазине.
+      operationId: addPet
+      security:
+        - apiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+        description: Данные питомца для добавления.
+      responses:
+        '200':
+          description: Питомец успешно добавлен.
+        '400':
+          description: Неверный запрос.
+    /pet/{petId}:
+      get:
+        summary: Получить информацию о питомце
+        description: Возвращает данные питомца по его идентификатору.
+        operationId: getPetById
+        security:
+          - apiKey: []
+        parameters:
+          - name: petId
+            in: path
+            required: true
+            schema:
+              type: integer
+              format: int64
+            description: Идентификатор питомца.
+        responses:
+          '200':
+            description: Успешный ответ с данными питомца.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Pet'
+          '404':
+            description: Питомец не найден.
+  /store/order:
+    post:
+      summary: Разместить заказ
+      description: Создаёт новый заказ в магазине.
+      operationId: placeOrder
+      security:
+        - apiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        description: Данные заказа.
+      responses:
+        '200':
+          description: Заказ успешно размещён.
+        '400':
+          description: Неверный запрос.
+  /user:
+    post:
+      summary: Создать пользователя
+      description: Регистрирует нового пользователя в системе.
+      operationId: createUser
+      security:
+        - apiKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Данные пользователя.
+      responses:
+        '200':
+          description: Пользователь успешно создан.
+        '400':
+          description: Неверный запрос.
